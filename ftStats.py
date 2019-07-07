@@ -1,29 +1,9 @@
 # -*- coding: utf-8 -*-
-import requests
 import csv
 import sys
+from modules.parser import Parser
 
 API_URL = 'https://fanteam-game.api.scoutgg.net'
-
-
-def get_html(url):
-    """Connection to the site"""
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/67.0.3396.79 Safari/537.36',
-               'Authorization': 'Bearer fanteam undefined'}
-    r = requests.get(url, headers=headers)
-    r.encoding = 'utf-8'
-    return r
-
-
-def get_page_data(response):
-    """Getting json data"""
-    try:
-        data = response.json()
-    except Exception:
-        data = ''
-    return data
 
 
 def write_csv(data):
@@ -42,7 +22,7 @@ def write_csv(data):
                  'gw_points',
                  'gw_price',
                  'homeTeam',
-                 'gameweek',]
+                 'gameweek', ]
         writer = csv.DictWriter(file, fieldnames=order)
         writer.writerow(data)
 
@@ -203,8 +183,10 @@ def main(kindOfSport='football', season_id=234, gameweek=38):
     """Request information about the players. General request"""
     url = f'{API_URL}/seasons/{season_id}/players?season_id={season_id}&' + \
         f'white_label=fanteam&round={gameweek}'
-    get_realPlayers(get_page_data(get_html(url)), kindOfSport, gameweek)
-
+    # get_realPlayers(get_page_data(get_html(url)), kindOfSport, gameweek)
+    authorization = {'Authorization': 'Bearer fanteam undefined'}
+    platform = Parser(url, authorization)
+    get_realPlayers(platform.parserResult(), kindOfSport, gameweek)
 
 if __name__ == '__main__':
     main()

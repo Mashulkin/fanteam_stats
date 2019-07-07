@@ -3,6 +3,8 @@ import sys
 from PyQt5 import QtWidgets
 import design
 import ftStats
+from modules.parser import Parser
+
 
 
 class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
@@ -25,8 +27,10 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.comboBox.addItem('EPL 18-19')
 
         # *** spinBox Gameweek. maximum and now ***
-        self.spinBox.setMaximum(self.seasons[234]['finalRound'])
-        self.spinBox.setValue(self.seasons[234]['lastRound'])
+        self.spinBox.setMaximum(38)
+        self.spinBox.setValue(38)
+        # self.spinBox.setMaximum(self.seasons[234]['finalRound'])
+        # self.spinBox.setValue(self.seasons[234]['lastRound'])
 
         # *** Button ***
         self.btnParser.clicked.connect(self.pushButton_Parser)
@@ -63,7 +67,11 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
 def get_season():
     url = f'{ftStats.API_URL}/match_collections?statuses[]=waiting&' + \
         f'tab=admin_created&type=fantasy&per_page=10&page=0'
-    seasons_data = ftStats.get_page_data(ftStats.get_html(url))
+    # seasons_data = ftStats.get_page_data(ftStats.get_html(url))
+    authorization = {'Authorization': 'Bearer fanteam undefined'}
+    platform = Parser(url, authorization)
+    seasons_data = platform.parserResult()
+    # print(seasons_data)
 
     seasons = {}
     for item in seasons_data['seasons']:
@@ -78,7 +86,7 @@ def get_season():
                                     'gameType': gameType,
                                     'finalRound': finalRound,
                                     'lastRound': lastRound}})
-    # print(seasons)
+    print(seasons)
     return seasons
 
 
