@@ -14,7 +14,8 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setFixedSize(555, 219)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("favicon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(
+            "favicon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -70,7 +71,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Stats on Fanteam v.1.01 (by Vadim Arsenev)"))
+        MainWindow.setWindowTitle(_translate(
+            "MainWindow", "Stats on Fanteam v.1.0.2 (by Vadim Arsenev)"))
         self.rbFootball.setText(_translate("MainWindow", "Football"))
         self.rbHockey.setText(_translate("MainWindow", "Hockey"))
         self.lbSport.setText(_translate("MainWindow", "Kind of sport"))

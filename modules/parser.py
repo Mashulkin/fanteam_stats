@@ -4,6 +4,7 @@ import requests
 
 __author__ = 'Vadim Arsenev'
 __version__ = '1.0.1'
+__data__ = '21.07.2019'
 
 
 class Parser(object):

@@ -3,95 +3,85 @@ import sys
 from PyQt5 import QtWidgets
 import design
 import ftStats
-from modules.parser import Parser
 
+
+__author__ = 'Vadim Arsenev'
+__version__ = '1.0.2'
+__data__ = '21.07.2019'
 
 
 class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
+
     def __init__(self, seasons):
         super().__init__()
         self.setupUi(self)
 
-        # list of seasons with fanteam
+        # list of seasons with platform
         self.seasons = seasons
 
         # *** radio button Kind of Sport ***
         self.bgSport = QtWidgets.QButtonGroup()
         self.bgSport.addButton(self.rbFootball)
         self.bgSport.addButton(self.rbHockey)
-
         self.rbFootball.setChecked(True)
-        self.bgSport.buttonClicked.connect(self.rbSport_Clicked)
+        self.bgSport.buttonClicked.connect(self.bgSport_Clicked)
 
         # *** comboBox Tournaments ***
-        self.comboBox.addItem('EPL 18-19')
+        self.comboBoxInit_football()
+        self.comboBox.activated.connect(self.comboBox_Activated)
 
         # *** spinBox Gameweek. maximum and now ***
-        self.spinBox.setMaximum(38)
-        self.spinBox.setValue(38)
-        # self.spinBox.setMaximum(self.seasons[234]['finalRound'])
-        # self.spinBox.setValue(self.seasons[234]['lastRound'])
+        self.comboBox_Activated()
 
         # *** Button ***
         self.btnParser.clicked.connect(self.pushButton_Parser)
 
     def pushButton_Parser(self):
         gameweek = int(self.spinBox.value())
+        for league in LEAGUES:
+            if self.comboBox.currentText() == league['name']:
+                season_id = league['season_id']
+                kindOfSport = league['kindOfSport']
+                break
 
-        if self.rbFootball.isChecked():
-            kindOfSport = 'football'
-        elif self.rbHockey.isChecked():
-            kindOfSport = 'hockey'
+        try:
+            ftStats.main(kindOfSport, season_id, gameweek)
+        except TypeError:
+            print('Invalid')
 
-        if self.comboBox.currentText() == 'EPL 18-19':
-            season_id = 234
-        elif self.comboBox.currentText() == 'NHL 18-19':
-            season_id = 286
+    def comboBoxInit_football(self):
+        for league in LEAGUES:
+            if league['kindOfSport'] == 'football':
+                self.comboBox.addItem(league['name'])
 
-        ftStats.main(kindOfSport, season_id, gameweek)
+    def comboBoxInit_hockey(self):
+        for league in LEAGUES:
+            if league['kindOfSport'] == 'hockey':
+                self.comboBox.addItem(league['name'])
 
-    def rbSport_Clicked(self, button):
+    def comboBox_Activated(self):
+        for item in LEAGUES:
+            if self.comboBox.currentText() == item['name']:
+                self.spinBox.setMaximum(
+                    self.seasons[item['season_id']]['finalRound'])
+                try:
+                    self.spinBox.setValue(
+                        self.seasons[item['season_id']]['lastRound'])
+                except TypeError:
+                    self.spinBox.setValue(1)
+                break
+
+    def bgSport_Clicked(self, button):
+        self.comboBox.clear()
         if button.text() == 'Football':
-            self.comboBox.clear()
-            self.comboBox.addItem('EPL 18-19')
-            self.spinBox.setMaximum(self.seasons[234]['finalRound'])
-            self.spinBox.setValue(self.seasons[234]['lastRound'])
+            self.comboBoxInit_football()
         elif button.text() == 'Hockey':
-            self.comboBox.clear()
-            self.comboBox.addItem('NHL 18-19')
-            self.spinBox.setMaximum(self.seasons[286]['finalRound'])
-            self.spinBox.setValue(self.seasons[286]['lastRound'])
-        # print(button.text())
-
-
-def get_season():
-    url = f'{ftStats.API_URL}/match_collections?statuses[]=waiting&' + \
-        f'tab=admin_created&type=fantasy&per_page=10&page=0'
-    # seasons_data = ftStats.get_page_data(ftStats.get_html(url))
-    authorization = {'Authorization': 'Bearer fanteam undefined'}
-    platform = Parser(url, authorization)
-    seasons_data = platform.parserResult()
-    # print(seasons_data)
-
-    seasons = {}
-    for item in seasons_data['seasons']:
-        year = item.get('season')
-        league = item.get('league')['name']
-        gameType = item.get('league')['gameType']
-        season_id = item.get('id')
-        finalRound = item.get('finalRound')
-        lastRound = item.get('lastRound')
-        seasons.update({season_id: {'year': year,
-                                    'league': league,
-                                    'gameType': gameType,
-                                    'finalRound': finalRound,
-                                    'lastRound': lastRound}})
-    print(seasons)
-    return seasons
+            self.comboBoxInit_hockey()
+        self.comboBox_Activated()
 
 
 def main():
-    seasons = get_season()
+    seasons = ftStats.get_season()
 
     app = QtWidgets.QApplication(sys.argv)
     window = MyWindow(seasons)
@@ -100,4 +90,11 @@ def main():
 
 
 if __name__ == '__main__':
+    LEAGUES = [{'name': 'EPL 19-20', 'season_id': 387,
+                'kindOfSport': 'football', },
+               {'name': 'EPL 18-19', 'season_id': 234,
+                'kindOfSport': 'football', },
+               {'name': 'NHL 18-19', 'season_id': 286,
+                'kindOfSport': 'hockey', },
+               ]
     main()

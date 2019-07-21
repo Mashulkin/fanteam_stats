@@ -179,6 +179,31 @@ def get_realPlayers(real_players_data, kindOfSport, gameweek):
         write_csv(data_gameweek)
 
 
+def get_season():
+    url = f'{API_URL}/match_collections?statuses[]=waiting&' + \
+        f'tab=admin_created&type=fantasy&per_page=10&page=0'
+    # seasons_data = ftStats.get_page_data(ftStats.get_html(url))
+    authorization = {'Authorization': 'Bearer fanteam undefined'}
+    platform = Parser(url, authorization)
+    seasons_data = platform.parserResult()
+    # print(seasons_data)
+
+    seasons = {}
+    for item in seasons_data['seasons']:
+        year = item.get('season')
+        league = item.get('league')['name']
+        gameType = item.get('league')['gameType']
+        season_id = item.get('id')
+        finalRound = item.get('finalRound')
+        lastRound = item.get('lastRound')
+        seasons.update({season_id: {'year': year,
+                                    'league': league,
+                                    'gameType': gameType,
+                                    'finalRound': finalRound,
+                                    'lastRound': lastRound}})
+    return seasons
+
+
 def main(kindOfSport='football', season_id=234, gameweek=38):
     """Request information about the players. General request"""
     url = f'{API_URL}/seasons/{season_id}/players?season_id={season_id}&' + \
