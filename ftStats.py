@@ -123,15 +123,27 @@ def get_realMatches(matches_data, realMatchId, realTeamId):
 def format_data(kindOfSport, gw_points):
     """Formatting game data"""
     # Formatting by type of sport
-    if kindOfSport == 'hockey':
+    if kindOfSport == 'football':
+        try:
+            gw_points = '{:.0f}'.format(float(gw_points) / 100)
+        except ValueError:
+            gw_points = gw_points
+
+    elif kindOfSport == 'hockey':
         try:
             gw_points = '{:.1f}'.format(float(gw_points) / 10)
         except ValueError:
             gw_points = gw_points
 
-    if kindOfSport == 'basket':
+    elif kindOfSport == 'basket':
         try:
             gw_points = '{:.2f}'.format(float(gw_points) / 4)
+        except ValueError:
+            gw_points = gw_points
+
+    elif kindOfSport == 'baseball':
+        try:
+            gw_points = '{:.1f}'.format(float(gw_points) / 20)
         except ValueError:
             gw_points = gw_points
 
