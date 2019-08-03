@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import csv
 import sys
+import os.path
 from modules.parser import Parser
 
 API_URL = 'https://fanteam-game.api.scoutgg.net'
@@ -29,6 +30,7 @@ def write_csv(data):
 
 def run_once(f):
     def wrapper(*args, **kwargs):
+        wrapper.has_run = os.path.isfile('FtStats.csv')
         if not wrapper.has_run:
             wrapper.has_run = True
             return f(*args, **kwargs)

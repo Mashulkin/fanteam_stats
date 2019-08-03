@@ -6,8 +6,8 @@ import ftStats
 
 
 __author__ = 'Vadim Arsenev'
-__version__ = '1.1.0'
-__data__ = '27.07.2019'
+__version__ = '1.1.1'
+__data__ = '03.08.2019'
 
 
 class DialogError(QtWidgets.QDialog):
