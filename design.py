@@ -70,6 +70,12 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.btnParser.setFont(font)
         self.btnParser.setObjectName("btnParser")
+        self.checkBox = QtWidgets.QCheckBox(self.centralwidget)
+        self.checkBox.setGeometry(QtCore.QRect(50, 190, 20, 20))
+        self.checkBox.setObjectName("checkBox")
+        self.lbSkip = QtWidgets.QLabel(self.centralwidget)
+        self.lbSkip.setGeometry(QtCore.QRect(70, 183, 150, 31))
+        self.lbSkip.setObjectName("lbSkip")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -78,7 +84,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate(
-            "MainWindow", "Stats on Fanteam v.1.1.0 (by Vadim Arsenev)"))
+            "MainWindow", "Stats on Fanteam v.1.2.0 (by Vadim Arsenev)"))
         self.rbFootball.setText(_translate("MainWindow", "Football"))
         self.rbHockey.setText(_translate("MainWindow", "Hockey"))
         self.rbBasketball.setText(_translate("MainWindow", "Basketball"))
@@ -87,3 +93,5 @@ class Ui_MainWindow(object):
         self.lbTournament.setText(_translate("MainWindow", "Tournaments"))
         self.lbGw.setText(_translate("MainWindow", "Gameweek"))
         self.btnParser.setText(_translate("MainWindow", "Start parsing"))
+        self.checkBox.setText(_translate("MainWindow", ""))
+        self.lbSkip.setText(_translate("MainWindow", "Skipping non-playing players"))

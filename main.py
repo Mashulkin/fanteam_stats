@@ -6,8 +6,8 @@ import ftStats
 
 
 __author__ = 'Vadim Arsenev'
-__version__ = '1.1.1'
-__data__ = '03.08.2019'
+__version__ = '1.2.0'
+__data__ = '16.08.2019'
 
 
 class DialogError(QtWidgets.QDialog):
@@ -45,6 +45,11 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.rbFootball.setChecked(True)
         self.bgSport.buttonClicked.connect(self.bgSport_Clicked)
 
+        # *** checkBox Skip ***
+        self.checkBox.setChecked(True)
+        self.skipNonPlaying = True
+        self.checkBox.stateChanged.connect(self.checkBox_Changed)
+
         # *** comboBox Tournaments ***
         self.comboBoxInit_football()
         self.comboBox.activated.connect(self.comboBox_Activated)
@@ -60,6 +65,7 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
     def pushButton_Parser(self):
         gameweek = int(self.spinBox.value())
+        # skipNonPlaying = self.skipNonPlaying
         for league in LEAGUES:
             if self.comboBox.currentText() == league['name']:
                 season_id = league['season_id']
@@ -67,7 +73,7 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 break
 
         try:
-            ftStats.main(kindOfSport, season_id, gameweek)
+            ftStats.main(kindOfSport, season_id, gameweek, self.skipNonPlaying)
         except TypeError:
             self.dialogError.exec_()
 
@@ -107,6 +113,12 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 except TypeError:
                     self.spinBox.setValue(1)
                 break
+    
+    def checkBox_Changed(self):
+        if self.checkBox.isChecked():
+            self.skipNonPlaying = True
+        else:
+            self.skipNonPlaying = False
 
     def bgSport_Clicked(self, button):
         self.comboBox.clear()

@@ -6,15 +6,17 @@ from modules.parser import Parser
 
 API_URL = 'https://fanteam-game.api.scoutgg.net'
 
+# for terminal and .exe in Windows
+FILENAME = ['./data/ftStats.csv']
+# for app in Mac OS
+# FILENAME = ['/'.join(sys.argv[0].split('/')[:-4]), '/data/ftStats.csv']
+
 
 def write_csv(data):
     """Write data in csv file"""
-    # for terminal and .exe in Windows
-    pathFile = ['FtStats.csv']
-
-    # for app in Mac OS
-    # pathFile = ['/'.join(sys.argv[0].split('/')[:-4]), '/FtStats.csv']
-    with open(''.join(pathFile), 'a', encoding='utf-8') as file:
+    if not os.path.exists(os.path.dirname(FILENAME[0])):
+        os.makedirs(os.path.dirname(FILENAME[0]))
+    with open(''.join(FILENAME), 'a', encoding='utf-8') as file:
         order = ['firstName',
                  'lastName',
                  'team_name',
@@ -22,6 +24,7 @@ def write_csv(data):
                  'position',
                  'gw_points',
                  'gw_price',
+                 'minutesPlayed',
                  'homeTeam',
                  'gameweek', ]
         writer = csv.DictWriter(file, fieldnames=order)
@@ -30,7 +33,7 @@ def write_csv(data):
 
 def run_once(f):
     def wrapper(*args, **kwargs):
-        wrapper.has_run = os.path.isfile('FtStats.csv')
+        wrapper.has_run = os.path.isfile(''.join(FILENAME))
         if not wrapper.has_run:
             wrapper.has_run = True
             return f(*args, **kwargs)
@@ -50,7 +53,8 @@ def print_headline():
                      'homeTeam': 'St',
                      'gw_points': 'Points',
                      'gw_price': 'Cost',
-                     'gameweek': 'Gw'}
+                     'gameweek': 'Gw',
+                     'minutesPlayed': 'Min', }
     write_csv(data_headline)
 
 
@@ -152,7 +156,7 @@ def format_data(kindOfSport, gw_points):
     return gw_points
 
 
-def get_realPlayers(real_players_data, kindOfSport, gameweek):
+def get_realPlayers(real_players_data, kindOfSport, gameweek, skipNonPlaying):
     """The main module for performing all operations of a request
        and writing to a file"""
     print_headline()
@@ -167,7 +171,11 @@ def get_realPlayers(real_players_data, kindOfSport, gameweek):
 
         # skipping non-playing players
         if minutesPlayed == 0:
-            continue
+            if skipNonPlaying:
+                continue
+            else:
+                minutesPlayed = ''
+                gw_points = ''
 
         firstName, lastName, position = get_playerSeasons(
             real_players_data['playerSeasons'], realPlayerId)
@@ -189,7 +197,8 @@ def get_realPlayers(real_players_data, kindOfSport, gameweek):
                          'gw_points': gw_points,
                          'gameweek': gameweek,
                          'gw_price': gw_price,
-                         'homeTeam': homeTeam}
+                         'homeTeam': homeTeam,
+                         'minutesPlayed': minutesPlayed, }
         write_csv(data_gameweek)
 
 
@@ -218,14 +227,14 @@ def get_season():
     return seasons
 
 
-def main(kindOfSport='football', season_id=234, gameweek=38):
+def main(kindOfSport='football', season_id=387, gameweek=1, skipNonPlaying = True):
     """Request information about the players. General request"""
     url = f'{API_URL}/seasons/{season_id}/players?season_id={season_id}&' + \
         f'white_label=fanteam&round={gameweek}'
     # get_realPlayers(get_page_data(get_html(url)), kindOfSport, gameweek)
     authorization = {'Authorization': 'Bearer fanteam undefined'}
     platform = Parser(url, authorization)
-    get_realPlayers(platform.parserResult(), kindOfSport, gameweek)
+    get_realPlayers(platform.parserResult(), kindOfSport, gameweek, skipNonPlaying)
 
 if __name__ == '__main__':
     main()
