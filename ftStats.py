@@ -22,9 +22,11 @@ def write_csv(data):
                  'team_name',
                  'abbr',
                  'position',
+                 'minutesPlayed',
                  'gw_points',
                  'gw_price',
-                 'minutesPlayed',
+                 'selectedRatio',
+                 'captainedRatio',
                  'homeTeam',
                  'gameweek', ]
         writer = csv.DictWriter(file, fieldnames=order)
@@ -54,6 +56,8 @@ def print_headline():
                      'gw_points': 'Points',
                      'gw_price': 'Cost',
                      'gameweek': 'Gw',
+                     'selectedRatio': 'Select',
+                     'captainedRatio': 'Cap',
                      'minutesPlayed': 'Min', }
     write_csv(data_headline)
 
@@ -126,18 +130,18 @@ def get_realMatches(matches_data, realMatchId, realTeamId):
     return homeTeam
 
 
-def format_data(kindOfSport, gw_points):
+def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio):
     """Formatting game data"""
     # Formatting by type of sport
     if kindOfSport == 'football':
         try:
-            gw_points = '{:.0f}'.format(float(gw_points) / 100)
+            gw_points = '{:.1f}'.format(float(gw_points) / 100)
         except ValueError:
             gw_points = gw_points
 
     elif kindOfSport == 'hockey':
         try:
-            gw_points = '{:.1f}'.format(float(gw_points) / 10)
+            gw_points = '{:.1f}'.format(float(gw_points) / 100)
         except ValueError:
             gw_points = gw_points
 
@@ -149,14 +153,48 @@ def format_data(kindOfSport, gw_points):
 
     elif kindOfSport == 'baseball':
         try:
-            gw_points = '{:.1f}'.format(float(gw_points) / 20)
+            gw_points = '{:.2f}'.format(float(gw_points) / 20)
         except ValueError:
             gw_points = gw_points
 
-    return gw_points
+    try:
+        if float(selectedRatio) != 0:
+            selectedRatio = '{:.2f}'.format(float(selectedRatio) * 100)
+        else:
+            selectedRatio = ''
+    except ValueError:
+        selectedRatio = selectedRatio
+
+    try:
+        if float(captainedRatio) != 0:
+            captainedRatio = '{:.2f}'.format(float(captainedRatio) * 100)
+        else:
+            captainedRatio = ''
+    except ValueError:
+        captainedRatio = captainedRatio
+
+    return gw_points, selectedRatio, captainedRatio
 
 
-def get_realPlayers(real_players_data, kindOfSport, gameweek, skipNonPlaying):
+def get_ownership(realPlayerId, numTourn, gameweek, season_id):
+    url = f'{API_URL}/real_players/{realPlayerId}?season_id={season_id}&' + \
+        f'round={gameweek}&tournament_id={numTourn}'
+    authorization = {'Authorization': 'Bearer fanteam undefined'}
+    plarform_player = Parser(url, authorization)
+    data_player = plarform_player.parserResult()
+
+    try:
+        selectedRatio = data_player[
+            'tournamentPlayerStats'].get('selectedRatio')
+        captainedRatio = data_player[
+            'tournamentPlayerStats'].get('captainedRatio')
+    except AttributeError:
+        selectedRatio, captainedRatio = ['', '']
+    return selectedRatio, captainedRatio
+
+
+def get_realPlayers(real_players_data, kindOfSport, season_id, \
+        gameweek, skipNonPlaying, numTourn, enableNumTourn):
     """The main module for performing all operations of a request
        and writing to a file"""
     print_headline()
@@ -184,9 +222,15 @@ def get_realPlayers(real_players_data, kindOfSport, gameweek, skipNonPlaying):
         homeTeam = get_realMatches(
             real_players_data['realMatches'], realMatchId, realTeamId)
 
-        gw_points = format_data(kindOfSport, gw_points)
+        if enableNumTourn:
+            selectedRatio, captainedRatio = get_ownership(
+                realPlayerId, numTourn, gameweek, season_id)
+            print(lastName)
+        else:
+            selectedRatio, captainedRatio = ['', '']
 
-        # print(full_player_name)
+        gw_points, selectedRatio, captainedRatio = format_data(
+            kindOfSport, gw_points, selectedRatio, captainedRatio)
 
         # Gameweek data dictionary. Data generation and writing to file
         data_gameweek = {'firstName': firstName,
@@ -198,6 +242,8 @@ def get_realPlayers(real_players_data, kindOfSport, gameweek, skipNonPlaying):
                          'gameweek': gameweek,
                          'gw_price': gw_price,
                          'homeTeam': homeTeam,
+                         'selectedRatio': selectedRatio,
+                         'captainedRatio': captainedRatio,
                          'minutesPlayed': minutesPlayed, }
         write_csv(data_gameweek)
 
@@ -227,14 +273,16 @@ def get_season():
     return seasons
 
 
-def main(kindOfSport='football', season_id=387, gameweek=1, skipNonPlaying = True):
+def main(kindOfSport='football', season_id=387, gameweek=1, \
+        skipNonPlaying = True, numTourn=176601, enableNumTourn=False):
     """Request information about the players. General request"""
     url = f'{API_URL}/seasons/{season_id}/players?season_id={season_id}&' + \
         f'white_label=fanteam&round={gameweek}'
     # get_realPlayers(get_page_data(get_html(url)), kindOfSport, gameweek)
     authorization = {'Authorization': 'Bearer fanteam undefined'}
     platform = Parser(url, authorization)
-    get_realPlayers(platform.parserResult(), kindOfSport, gameweek, skipNonPlaying)
+    get_realPlayers(platform.parserResult(), kindOfSport, season_id, \
+        gameweek, skipNonPlaying, numTourn, enableNumTourn)
 
 if __name__ == '__main__':
     main()

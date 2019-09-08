@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 import design
 import ftStats
 
@@ -12,10 +12,11 @@ __data__ = '16.08.2019'
 
 class DialogError(QtWidgets.QDialog):
 
-    def __init__(self, root, **kwargs):
+    def __init__(self, root, textError, **kwargs):
         super().__init__(root, **kwargs)
         self.main = root
-        label = QtWidgets.QLabel('No parsing information!')
+        # label = QtWidgets.QLabel('No parsing information!')
+        label = QtWidgets.QLabel(textError)
         btnOk = QtWidgets.QPushButton('Ok')
         btnOk.clicked.connect(self.pushButton_Ok)
         layout = QtWidgets.QVBoxLayout()
@@ -50,9 +51,20 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.skipNonPlaying = True
         self.checkBox.stateChanged.connect(self.checkBox_Changed)
 
+        # *** checkBox Enable number tournament ***
+        self.cbEnableNumTourn.setChecked(False)
+        self.enableNumTourn = False
+        self.cbEnableNumTourn.stateChanged.connect(
+            self.cbEnableNumTourn_Changed)
+
         # *** comboBox Tournaments ***
         self.comboBoxInit_football()
         self.comboBox.activated.connect(self.comboBox_Activated)
+
+        # *** lineEdit Number Tournament ***
+        leIntValidator = QtGui.QIntValidator(self)
+        self.leNumTourn.setValidator(leIntValidator)
+        self.leNumTourn.setEnabled(False)
 
         # *** spinBox Gameweek. maximum and now ***
         self.comboBox_Activated()
@@ -61,10 +73,12 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.btnParser.clicked.connect(self.pushButton_Parser)
 
         # *** Error window ***
-        self.dialogError = DialogError(self)
+        # self.textError = ''
+        # self.dialogError = DialogError(self, textError=self.textError)
 
     def pushButton_Parser(self):
         gameweek = int(self.spinBox.value())
+        numTourn = self.leNumTourn.text()
         # skipNonPlaying = self.skipNonPlaying
         for league in LEAGUES:
             if self.comboBox.currentText() == league['name']:
@@ -73,8 +87,15 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 break
 
         try:
-            ftStats.main(kindOfSport, season_id, gameweek, self.skipNonPlaying)
+            ftStats.main(kindOfSport, season_id, gameweek, \
+                self.skipNonPlaying, numTourn, self.enableNumTourn)
         except TypeError:
+            self.textError = 'No parsing information!'
+            self.dialogError = DialogError(self, textError=self.textError)
+            self.dialogError.exec_()
+        except KeyError:
+            self.textError = 'Enter tournament number'
+            self.dialogError = DialogError(self, textError=self.textError)
             self.dialogError.exec_()
 
     def comboBoxInit_football(self):
@@ -119,6 +140,14 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
             self.skipNonPlaying = True
         else:
             self.skipNonPlaying = False
+
+    def cbEnableNumTourn_Changed(self):
+        if self.cbEnableNumTourn.isChecked():
+            self.enableNumTourn = True
+            self.leNumTourn.setEnabled(True)
+        else:
+            self.enableNumTourn = False
+            self.leNumTourn.setEnabled(False)
 
     def bgSport_Clicked(self, button):
         self.comboBox.clear()
