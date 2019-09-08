@@ -6,8 +6,8 @@ import ftStats
 
 
 __author__ = 'Vadim Arsenev'
-__version__ = '1.2.0'
-__data__ = '16.08.2019'
+__version__ = '1.3.0'
+__data__ = '08.09.2019'
 
 
 class DialogError(QtWidgets.QDialog):
@@ -43,52 +43,62 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.bgSport.addButton(self.rbHockey)
         self.bgSport.addButton(self.rbBasketball)
         self.bgSport.addButton(self.rbBaseball)
+        self.bgSport.addButton(self.rbTennis)
+        self.bgSport.addButton(self.rbAmericanFootball)
         self.rbFootball.setChecked(True)
+        self.rbTennis.setDisabled(True)
         self.bgSport.buttonClicked.connect(self.bgSport_Clicked)
 
-        # *** checkBox Skip ***
-        self.checkBox.setChecked(True)
-        self.skipNonPlaying = True
-        self.checkBox.stateChanged.connect(self.checkBox_Changed)
-
-        # *** checkBox Enable number tournament ***
-        self.cbEnableNumTourn.setChecked(False)
-        self.enableNumTourn = False
-        self.cbEnableNumTourn.stateChanged.connect(
-            self.cbEnableNumTourn_Changed)
-
         # *** comboBox Tournaments ***
-        self.comboBoxInit_football()
-        self.comboBox.activated.connect(self.comboBox_Activated)
-
-        # *** lineEdit Number Tournament ***
-        leIntValidator = QtGui.QIntValidator(self)
-        self.leNumTourn.setValidator(leIntValidator)
-        self.leNumTourn.setEnabled(False)
+        self.cbTournamentInit_football()
+        self.cbTournament.activated.connect(self.cbTournament_Activated)
 
         # *** spinBox Gameweek. maximum and now ***
-        self.comboBox_Activated()
+        self.cbTournament_Activated()
 
-        # *** Button ***
+        # *** checkBox Skip ***
+        self.chbSkip.setChecked(True)
+        self.skipNonPlaying = True
+        self.chbSkip.stateChanged.connect(self.chbSkip_Changed)
+
+        # *** checkBox Enable Ownership 1 ***
+        self.chbEnableOwnership1.setChecked(False)
+        self.enableOwnership1 = False
+        self.chbEnableOwnership1.stateChanged.connect(
+            self.chbEnableOwnership1_Changed)
+
+        # *** checkBox Enable Ownership 2 ***
+        self.chbEnableOwnership2.setChecked(False)
+        self.enableOwnership2 = False
+        self.chbEnableOwnership2.stateChanged.connect(
+            self.chbEnableOwnership2_Changed)
+        self.chbEnableOwnership2.setDisabled(True)
+
+        # *** lineEdit Number Tournament 1 ***
+        leIntValidator = QtGui.QIntValidator(self)
+        self.leNumTourn1.setValidator(leIntValidator)
+        self.leNumTourn1.setEnabled(False)
+
+        # *** lineEdit Number Tournament 2 ***
+        self.leNumTourn2.setValidator(leIntValidator)
+        self.leNumTourn2.setEnabled(False)
+
+        # *** button Start***
         self.btnParser.clicked.connect(self.pushButton_Parser)
 
-        # *** Error window ***
-        # self.textError = ''
-        # self.dialogError = DialogError(self, textError=self.textError)
-
     def pushButton_Parser(self):
-        gameweek = int(self.spinBox.value())
-        numTourn = self.leNumTourn.text()
-        # skipNonPlaying = self.skipNonPlaying
+        """Start parsing"""
+        gameweek = int(self.sbGw.value())
+        numTourn1 = self.leNumTourn1.text()
         for league in LEAGUES:
-            if self.comboBox.currentText() == league['name']:
+            if self.cbTournament.currentText() == league['name']:
                 season_id = league['season_id']
                 kindOfSport = league['kindOfSport']
                 break
 
         try:
-            ftStats.main(kindOfSport, season_id, gameweek, \
-                self.skipNonPlaying, numTourn, self.enableNumTourn)
+            ftStats.main(kindOfSport, season_id, gameweek,
+                         self.skipNonPlaying, numTourn1, self.enableOwnership1)
         except TypeError:
             self.textError = 'No parsing information!'
             self.dialogError = DialogError(self, textError=self.textError)
@@ -98,68 +108,102 @@ class MyWindow(QtWidgets.QMainWindow, design.Ui_MainWindow):
             self.dialogError = DialogError(self, textError=self.textError)
             self.dialogError.exec_()
 
-    def comboBoxInit_football(self):
+    def cbTournamentInit_football(self):
+        """Adding football tournaments"""
         for league in LEAGUES:
             if league['kindOfSport'] == 'football':
-                self.comboBox.addItem(league['name'])
+                self.cbTournament.addItem(league['name'])
 
-    def comboBoxInit_hockey(self):
+    def cbTournamentInit_hockey(self):
+        """Adding hockey tournaments"""
         for league in LEAGUES:
             if league['kindOfSport'] == 'hockey':
-                self.comboBox.addItem(league['name'])
+                self.cbTournament.addItem(league['name'])
 
-    def comboBoxInit_basketball(self):
+    def cbTournamentInit_basketball(self):
+        """Adding basketball tournaments"""
         for league in LEAGUES:
             if league['kindOfSport'] == 'basket':
-                self.comboBox.addItem(league['name'])
+                self.cbTournament.addItem(league['name'])
 
-    def comboBoxInit_baseball(self):
+    def cbTournamentInit_baseball(self):
+        """Adding baseball tournaments"""
         for league in LEAGUES:
             if league['kindOfSport'] == 'baseball':
-                self.comboBox.addItem(league['name'])
+                self.cbTournament.addItem(league['name'])
 
-    def comboBox_Activated(self):
+    def cbTournamentInit_tennis(self):
+        """Adding tennis tournaments"""
+        for league in LEAGUES:
+            if league['kindOfSport'] == 'tennis':
+                self.cbTournament.addItem(league['name'])
+
+    def cbTournamentInit_americanFootball(self):
+        """Adding american football tournaments"""
+        for league in LEAGUES:
+            if league['kindOfSport'] == 'american_football':
+                self.cbTournament.addItem(league['name'])
+
+    def cbTournament_Activated(self):
+        """Adding the last and final rounds to the Gameweek spin box
+        to set now and the maximum value"""
         for item in LEAGUES:
-            if self.comboBox.currentText() == item['name']:
+            if self.cbTournament.currentText() == item['name']:
                 try:
-                    self.spinBox.setMaximum(
+                    self.sbGw.setMaximum(
                         self.seasons[item['season_id']]['finalRound'])
                 except KeyError:
-                    self.spinBox.setMaximum(item['finalRound'])
+                    self.sbGw.setMaximum(item['finalRound'])
                 try:
-                    self.spinBox.setValue(
+                    self.sbGw.setValue(
                         self.seasons[item['season_id']]['lastRound'])
                 except KeyError:
-                    self.spinBox.setValue(item['finalRound'])
+                    self.sbGw.setValue(item['finalRound'])
                 except TypeError:
-                    self.spinBox.setValue(1)
+                    self.sbGw.setValue(1)
                 break
-    
-    def checkBox_Changed(self):
-        if self.checkBox.isChecked():
+
+    def bgSport_Clicked(self, button):
+        """Sport choice"""
+        self.cbTournament.clear()
+        if button.text() == 'Football':
+            self.cbTournamentInit_football()
+        elif button.text() == 'Hockey':
+            self.cbTournamentInit_hockey()
+        elif button.text() == 'Basketball':
+            self.cbTournamentInit_basketball()
+        elif button.text() == 'Baseball':
+            self.cbTournamentInit_baseball()
+        elif button.text() == 'Tennis':
+            self.cbTournamentInit_tennis()
+        elif button.text() == 'American football':
+            self.cbTournamentInit_americanFootball()
+        self.cbTournament_Activated()
+
+    def chbSkip_Changed(self):
+        """Choice skip or not non-playing players"""
+        if self.chbSkip.isChecked():
             self.skipNonPlaying = True
         else:
             self.skipNonPlaying = False
 
-    def cbEnableNumTourn_Changed(self):
-        if self.cbEnableNumTourn.isChecked():
-            self.enableNumTourn = True
-            self.leNumTourn.setEnabled(True)
+    def chbEnableOwnership1_Changed(self):
+        """Enable and disable Ownership 1"""
+        if self.chbEnableOwnership1.isChecked():
+            self.enableOwnership1 = True
+            self.leNumTourn1.setEnabled(True)
         else:
-            self.enableNumTourn = False
-            self.leNumTourn.setEnabled(False)
+            self.enableOwnership1 = False
+            self.leNumTourn1.setEnabled(False)
 
-    def bgSport_Clicked(self, button):
-        self.comboBox.clear()
-        if button.text() == 'Football':
-            self.comboBoxInit_football()
-        elif button.text() == 'Hockey':
-            self.comboBoxInit_hockey()
-        elif button.text() == 'Basketball':
-            self.comboBoxInit_basketball()
-        elif button.text() == 'Baseball':
-            self.comboBoxInit_baseball()
-        self.comboBox_Activated()
+    def chbEnableOwnership2_Changed(self):
+        """Enable and disable Ownership 2"""
+        if self.chbEnableOwnership2.isChecked():
+            self.enableOwnership2 = True
+            self.leNumTourn2.setEnabled(True)
+        else:
+            self.enableOwnership2 = False
+            self.leNumTourn2.setEnabled(False)
 
 
 def main():
@@ -173,23 +217,29 @@ def main():
 
 
 if __name__ == '__main__':
-    LEAGUES = [{'name': 'EPL 19-20', 'season_id': 387,
+    LEAGUES = [{'name': 'EPL 2019/20', 'season_id': 387,
                 'kindOfSport': 'football',
                 'finalRound': 38, },
-               {'name': 'EPL 18-19', 'season_id': 234,
+               {'name': 'EPL 2018/19', 'season_id': 234,
                 'kindOfSport': 'football',
                 'finalRound': 38, },
-            #    {'name': 'NHL 19-20', 'season_id': 000,
+            #    {'name': 'NHL 2019/20', 'season_id': 000,
             #     'kindOfSport': 'hockey',
             #     'finalRound': 000, },
-               {'name': 'NHL 18-19', 'season_id': 286,
+               {'name': 'NHL 2018/19', 'season_id': 286,
                 'kindOfSport': 'hockey',
                 'finalRound': 223, },
-               {'name': 'NBA 18-19', 'season_id': 308,
+               {'name': 'NBA 2018/19', 'season_id': 308,
                 'kindOfSport': 'basket',
                 'finalRound': 217, },
                {'name': 'MLB 2019', 'season_id': 358,
                 'kindOfSport': 'baseball',
                 'finalRound': 185, },
+            #    {'name': 'Tennis 2019', 'season_id': 000,
+            #     'kindOfSport': 'tennis',
+            #     'finalRound': 000, },
+               {'name': 'NFL 2019', 'season_id': 439,
+                'kindOfSport': 'american_football',
+                'finalRound': 17, },
                ]
     main()

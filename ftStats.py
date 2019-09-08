@@ -133,13 +133,7 @@ def get_realMatches(matches_data, realMatchId, realTeamId):
 def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio):
     """Formatting game data"""
     # Formatting by type of sport
-    if kindOfSport == 'football':
-        try:
-            gw_points = '{:.1f}'.format(float(gw_points) / 100)
-        except ValueError:
-            gw_points = gw_points
-
-    elif kindOfSport == 'hockey':
+    if kindOfSport == 'football' or 'hockey' or 'american_football':
         try:
             gw_points = '{:.1f}'.format(float(gw_points) / 100)
         except ValueError:
@@ -156,6 +150,12 @@ def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio):
             gw_points = '{:.2f}'.format(float(gw_points) / 20)
         except ValueError:
             gw_points = gw_points
+
+    # elif kindOfSport == 'tennis':
+    #     try:
+    #         gw_points = '{:.2f}'.format(float(gw_points) / 4)
+    #     except ValueError:
+    #         gw_points = gw_points
 
     try:
         if float(selectedRatio) != 0:
@@ -193,8 +193,8 @@ def get_ownership(realPlayerId, numTourn, gameweek, season_id):
     return selectedRatio, captainedRatio
 
 
-def get_realPlayers(real_players_data, kindOfSport, season_id, \
-        gameweek, skipNonPlaying, numTourn, enableNumTourn):
+def get_realPlayers(real_players_data, kindOfSport, season_id,
+                    gameweek, skipNonPlaying, numTourn, enableNumTourn):
     """The main module for performing all operations of a request
        and writing to a file"""
     print_headline()
@@ -273,16 +273,16 @@ def get_season():
     return seasons
 
 
-def main(kindOfSport='football', season_id=387, gameweek=1, \
-        skipNonPlaying = True, numTourn=176601, enableNumTourn=False):
+def main(kindOfSport='football', season_id=387, gameweek=1,
+         skipNonPlaying=True, numTourn=176601, enableNumTourn=False):
     """Request information about the players. General request"""
     url = f'{API_URL}/seasons/{season_id}/players?season_id={season_id}&' + \
         f'white_label=fanteam&round={gameweek}'
     # get_realPlayers(get_page_data(get_html(url)), kindOfSport, gameweek)
     authorization = {'Authorization': 'Bearer fanteam undefined'}
     platform = Parser(url, authorization)
-    get_realPlayers(platform.parserResult(), kindOfSport, season_id, \
-        gameweek, skipNonPlaying, numTourn, enableNumTourn)
+    get_realPlayers(platform.parserResult(), kindOfSport, season_id,
+                    gameweek, skipNonPlaying, numTourn, enableNumTourn)
 
 if __name__ == '__main__':
     main()
