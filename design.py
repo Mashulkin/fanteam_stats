@@ -80,7 +80,7 @@ class Ui_MainWindow(object):
         self.line1.setObjectName("line1")
         # spin box Gameweek
         self.sbGw = QtWidgets.QSpinBox(self.centralwidget)
-        self.sbGw.setGeometry(QtCore.QRect(260, 110, 70, 35))
+        self.sbGw.setGeometry(QtCore.QRect(250, 110, 70, 35))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.sbGw.setFont(font)
@@ -101,9 +101,6 @@ class Ui_MainWindow(object):
         # check box Skip non-playing players
         self.chbSkip = QtWidgets.QCheckBox(self.centralwidget)
         self.chbSkip.setGeometry(QtCore.QRect(190, 60, 210, 30))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.chbSkip.setFont(font)
         self.chbSkip.setObjectName("chbSkip")
         # vertical line2
         self.line2 = QtWidgets.QFrame(self.centralwidget)
@@ -114,16 +111,10 @@ class Ui_MainWindow(object):
         # check box Enable Ownership1
         self.chbEnableOwnership1 = QtWidgets.QCheckBox(self.centralwidget)
         self.chbEnableOwnership1.setGeometry(QtCore.QRect(420, 100, 140, 30))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.chbEnableOwnership1.setFont(font)
         self.chbEnableOwnership1.setObjectName("chbEnableOwnership1")
         # check box Enable Ownership2
         self.chbEnableOwnership2 = QtWidgets.QCheckBox(self.centralwidget)
         self.chbEnableOwnership2.setGeometry(QtCore.QRect(420, 170, 140, 30))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.chbEnableOwnership2.setFont(font)
         self.chbEnableOwnership2.setObjectName("chbEnableOwnership2")
         # line edit Number Tournament1
         self.leNumTourn1 = QtWidgets.QLineEdit(self.centralwidget)
