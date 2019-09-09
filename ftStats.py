@@ -19,7 +19,7 @@ def write_csv(data):
     with open(''.join(FILENAME), 'a', encoding='utf-8') as file:
         order = ['firstName',
                  'lastName',
-                 'team_name',
+                 'teamName',
                  'abbr',
                  'position',
                  'minutesPlayed',
@@ -27,7 +27,8 @@ def write_csv(data):
                  'gw_price',
                  'selectedRatio',
                  'captainedRatio',
-                 'homeTeam',
+                 'fieldTeam',
+                 'abbr_rival',
                  'gameweek', ]
         writer = csv.DictWriter(file, fieldnames=order)
         writer.writerow(data)
@@ -49,10 +50,11 @@ def print_headline():
        for various sports"""
     data_headline = {'firstName': 'firstName',
                      'lastName': 'lastName',
-                     'team_name': 'Team',
+                     'teamName': 'Team',
                      'abbr': 'Abbr',
+                     'abbr_rival': 'Rival',
                      'position': 'Pos',
-                     'homeTeam': 'St',
+                     'fieldTeam': 'St',
                      'gw_points': 'Points',
                      'gw_price': 'Cost',
                      'gameweek': 'Gw',
@@ -106,15 +108,22 @@ def get_playerSeasons(players_data, player_id):
     return firstName, lastName, position
 
 
-def get_realTeams(players_data, realTeamId):
+def get_realTeams(players_data, realTeamId, realTeamId_rival):
     """Getting team name and abbreviation by ID in database"""
+    teamName, abbr, teamName_rival, abbr_rival = ['', '', '', '']
     for team in players_data:
         if team.get('id') == realTeamId:
-            team_name = team.get('name')
+            teamName = team.get('name')
             abbr = team.get('abbr')
-            break
-        team_name, abbr = ['', '']
-    return team_name, abbr
+        if team.get('id') == realTeamId_rival:
+            teamName_rival = team.get('name')
+            abbr_rival = team.get('abbr')
+    # bug on the fanteam
+    abbr = 'AVL' if abbr == 'AV' else abbr
+    abbr_rival = 'AVL' if abbr_rival == 'AV' else abbr_rival
+    abbr = 'SHU' if abbr == 'SUN' else abbr
+    abbr_rival = 'SHU' if abbr_rival == 'SUN' else abbr_rival
+    return teamName, abbr, teamName_rival, abbr_rival
 
 
 def get_realMatches(matches_data, realMatchId, realTeamId):
@@ -122,12 +131,14 @@ def get_realMatches(matches_data, realMatchId, realTeamId):
     for item in matches_data:
         if item.get('id') == realMatchId:
             if item.get('realTeamIds')[0] == realTeamId:
-                homeTeam = 'H'
+                fieldTeam = 'H'
+                realTeamId_rival = item.get('realTeamIds')[1]
             else:
-                homeTeam = 'A'
+                fieldTeam = 'A'
+                realTeamId_rival = item.get('realTeamIds')[0]
             break
-        homeTeam = ''
-    return homeTeam
+        fieldTeam = ''
+    return fieldTeam, realTeamId_rival
 
 
 def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio):
@@ -217,10 +228,10 @@ def get_realPlayers(real_players_data, kindOfSport, season_id,
 
         firstName, lastName, position = get_playerSeasons(
             real_players_data['playerSeasons'], realPlayerId)
-        team_name, abbr = get_realTeams(
-            real_players_data['realTeams'], realTeamId)
-        homeTeam = get_realMatches(
+        fieldTeam, realTeamId_rival = get_realMatches(
             real_players_data['realMatches'], realMatchId, realTeamId)
+        teamName, abbr, teamName_rival, abbr_rival = get_realTeams(
+            real_players_data['realTeams'], realTeamId, realTeamId_rival)
 
         if enableNumTourn:
             selectedRatio, captainedRatio = get_ownership(
@@ -235,13 +246,15 @@ def get_realPlayers(real_players_data, kindOfSport, season_id,
         # Gameweek data dictionary. Data generation and writing to file
         data_gameweek = {'firstName': firstName,
                          'lastName': lastName,
-                         'team_name': team_name,
+                         'teamName': teamName,
                          'abbr': abbr,
+                        #  'teamName_rival': teamName_rival,
+                         'abbr_rival': abbr_rival,
                          'position': position,
                          'gw_points': gw_points,
                          'gameweek': gameweek,
                          'gw_price': gw_price,
-                         'homeTeam': homeTeam,
+                         'fieldTeam': fieldTeam,
                          'selectedRatio': selectedRatio,
                          'captainedRatio': captainedRatio,
                          'minutesPlayed': minutesPlayed, }
