@@ -22,8 +22,10 @@ def write_csv(data):
                  'teamName',
                  'abbr',
                  'position',
+                 'totalPoints',
                  'minutesPlayed',
                  'gw_points',
+                 'seasonPrice',
                  'gw_price',
                  'selectedRatio',
                  'captainedRatio',
@@ -60,6 +62,8 @@ def print_headline():
                      'gameweek': 'Gw',
                      'selectedRatio': 'Select',
                      'captainedRatio': 'Cap',
+                     'seasonPrice': 'Season',
+                     'totalPoints': 'Total',
                      'minutesPlayed': 'Min', }
     write_csv(data_headline)
 
@@ -104,8 +108,13 @@ def get_playerSeasons(players_data, player_id):
         if member.get('realPlayerId') == player_id:
             firstName, lastName = get_player_name(member['realPlayer'])
             position = get_position(member)
+            try:
+                seasonPrice = member.get('seasonPrice')['price']
+            except TypeError:
+                seasonPrice = ''
+            totalPoints = member.get('totalPoints')
             break
-    return firstName, lastName, position
+    return firstName, lastName, position, seasonPrice, totalPoints
 
 
 def get_realTeams(players_data, realTeamId, realTeamId_rival):
@@ -141,14 +150,16 @@ def get_realMatches(matches_data, realMatchId, realTeamId):
     return fieldTeam, realTeamId_rival
 
 
-def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio):
+def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio, totalPoints):
     """Formatting game data"""
     # Formatting by type of sport
     if kindOfSport == 'football' or 'hockey' or 'american_football':
         try:
+            totalPoints = '{:.1f}'.format(float(totalPoints) / 100)
             gw_points = '{:.1f}'.format(float(gw_points) / 100)
         except ValueError:
             gw_points = gw_points
+            totalPoints = totalPoints
 
     elif kindOfSport == 'basket':
         try:
@@ -184,7 +195,7 @@ def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio):
     except ValueError:
         captainedRatio = captainedRatio
 
-    return gw_points, selectedRatio, captainedRatio
+    return gw_points, selectedRatio, captainedRatio, totalPoints
 
 
 def get_ownership(realPlayerId, numTourn, gameweek, season_id):
@@ -212,10 +223,11 @@ def get_realPlayers(real_players_data, kindOfSport, season_id,
     for player in real_players_data['playerRounds']:
         # ***** Main query *****
         realPlayerId = player.get('realPlayerId')
-        realTeamId = player.get('matchPrice')['realTeamId']
-        realMatchId = player.get('matchPrice')['realMatchId']
+        realMatchId = player.get('realMatchId')
         gw_points = player.get('points')
         minutesPlayed = player.get('minutesPlayed')
+
+        realTeamId = player.get('matchPrice')['realTeamId']
         gw_price = player.get('matchPrice')['price']
 
         # skipping non-playing players
@@ -226,7 +238,7 @@ def get_realPlayers(real_players_data, kindOfSport, season_id,
                 minutesPlayed = ''
                 gw_points = ''
 
-        firstName, lastName, position = get_playerSeasons(
+        firstName, lastName, position, seasonPrice, totalPoints = get_playerSeasons(
             real_players_data['playerSeasons'], realPlayerId)
         fieldTeam, realTeamId_rival = get_realMatches(
             real_players_data['realMatches'], realMatchId, realTeamId)
@@ -240,8 +252,8 @@ def get_realPlayers(real_players_data, kindOfSport, season_id,
         else:
             selectedRatio, captainedRatio = ['', '']
 
-        gw_points, selectedRatio, captainedRatio = format_data(
-            kindOfSport, gw_points, selectedRatio, captainedRatio)
+        gw_points, selectedRatio, captainedRatio, totalPoints = format_data(
+            kindOfSport, gw_points, selectedRatio, captainedRatio, totalPoints)
 
         # Gameweek data dictionary. Data generation and writing to file
         data_gameweek = {'firstName': firstName,
@@ -257,6 +269,8 @@ def get_realPlayers(real_players_data, kindOfSport, season_id,
                          'fieldTeam': fieldTeam,
                          'selectedRatio': selectedRatio,
                          'captainedRatio': captainedRatio,
+                         'seasonPrice': seasonPrice,
+                         'totalPoints': totalPoints,
                          'minutesPlayed': minutesPlayed, }
         write_csv(data_gameweek)
 
@@ -286,7 +300,7 @@ def get_season():
     return seasons
 
 
-def main(kindOfSport='football', season_id=387, gameweek=1,
+def main(kindOfSport='football', season_id=387, gameweek=4,
          skipNonPlaying=True, numTourn=176601, enableNumTourn=False):
     """Request information about the players. General request"""
     url = f'{API_URL}/seasons/{season_id}/players?season_id={season_id}&' + \
