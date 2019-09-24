@@ -92,8 +92,12 @@ def get_position(member):
 
 def get_player_name(player):
     """Getting full player name"""
+    duplicates = ['Barnes', 'Gomes', 'Gray', 'Henderson',
+                  'Jota', 'Luiz', 'Pereira', ]
     firstName = player.get('firstName')
     lastName = player.get('lastName')
+    if lastName in duplicates:
+        lastName = f'{lastName} (' + f'{firstName})'   
     # if first_name is not None:
     #     full_player_name = f'{firstName} {lastName}'
     # else:
@@ -300,7 +304,7 @@ def get_season():
     return seasons
 
 
-def main(kindOfSport='football', season_id=387, gameweek=4,
+def main(kindOfSport='football', season_id=387, gameweek=6,
          skipNonPlaying=True, numTourn=176601, enableNumTourn=False):
     """Request information about the players. General request"""
     url = f'{API_URL}/seasons/{season_id}/players?season_id={season_id}&' + \
