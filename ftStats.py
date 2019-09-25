@@ -93,7 +93,7 @@ def get_position(member):
 def get_player_name(player):
     """Getting full player name"""
     duplicates = ['Barnes', 'Gomes', 'Gray', 'Henderson',
-                  'Jota', 'Luiz', 'Pereira', ]
+                  'Jota', 'Luiz', 'Pereira', 'Stephens', ]
     firstName = player.get('firstName')
     lastName = player.get('lastName')
     if lastName in duplicates:
