@@ -93,7 +93,8 @@ def get_position(member):
 def get_player_name(player):
     """Getting full player name"""
     duplicates = ['Barnes', 'Gomes', 'Gray', 'Henderson',
-                  'Jota', 'Luiz', 'Pereira', 'Stephens', ]
+                  'Jota', 'Luiz', 'Pereira', 'Stephens',
+                  'Davies', ]
     firstName = player.get('firstName')
     lastName = player.get('lastName')
     if lastName in duplicates:
@@ -157,10 +158,18 @@ def get_realMatches(matches_data, realMatchId, realTeamId):
 def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio, totalPoints):
     """Formatting game data"""
     # Formatting by type of sport
-    if kindOfSport == 'football' or 'hockey' or 'american_football':
+    if kindOfSport == 'football':
         try:
             totalPoints = '{:.1f}'.format(float(totalPoints) / 100)
             gw_points = '{:.1f}'.format(float(gw_points) / 100)
+        except ValueError:
+            gw_points = gw_points
+            totalPoints = totalPoints
+
+    elif kindOfSport == 'hockey':
+        try:
+            totalPoints = '{:.2f}'.format(float(totalPoints) / 100)
+            gw_points = '{:.2f}'.format(float(gw_points) / 100)
         except ValueError:
             gw_points = gw_points
             totalPoints = totalPoints
@@ -176,6 +185,14 @@ def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio, totalPoin
             gw_points = '{:.2f}'.format(float(gw_points) / 20)
         except ValueError:
             gw_points = gw_points
+
+    elif kindOfSport == 'american_football':
+        try:
+            totalPoints = '{:.1f}'.format(float(totalPoints) / 100)
+            gw_points = '{:.1f}'.format(float(gw_points) / 100)
+        except ValueError:
+            gw_points = gw_points
+            totalPoints = totalPoints
 
     # elif kindOfSport == 'tennis':
     #     try:
