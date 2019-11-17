@@ -176,9 +176,11 @@ def format_data(kindOfSport, gw_points, selectedRatio, captainedRatio, totalPoin
 
     elif kindOfSport == 'basket':
         try:
+            totalPoints = '{:.2f}'.format(float(totalPoints) / 4)
             gw_points = '{:.2f}'.format(float(gw_points) / 4)
         except ValueError:
             gw_points = gw_points
+            totalPoints = totalPoints
 
     elif kindOfSport == 'baseball':
         try:
