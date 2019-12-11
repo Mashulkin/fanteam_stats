@@ -94,7 +94,8 @@ def get_player_name(player):
     """Getting full player name"""
     duplicates = ['Barnes', 'Gomes', 'Gray', 'Henderson',
                   'Jota', 'Luiz', 'Pereira', 'Stephens',
-                  'Davies', 'Mendy', 'Taylor', 'James', ]
+                  'Davies', 'Mendy', 'Taylor', 'James',
+                  'McCarthy', ]
     firstName = player.get('firstName')
     lastName = player.get('lastName')
     if lastName in duplicates:
